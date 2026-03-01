@@ -3,213 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anime Profile Website</title>
+    <title>Anixer’s Anime Realm - Realtime Chat</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Anime-inspired design: Dark theme with neon accents, anime-style fonts */
         body {
-            background-color: #1a1a2e;
-            color: #e0e0e0;
-            font-family: 'Arial', sans-serif;
+            background-color: #0d001a;
+            color: #e0e0ff;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             margin: 0;
             padding: 0;
-            overflow-x: hidden;
-            animation: fadeIn 2s ease-in-out;
+            background-image: linear-gradient(rgba(10,0,30,0.85), rgba(20,0,50,0.85)), url('https://images.unsplash.com/photo-1553356084-58ef4a67b2a7?auto=format&fit=crop&q=80');
+            background-size: cover;
+            background-attachment: fixed;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        /* Header with animated profile */
         header {
             text-align: center;
-            padding: 50px 20px;
-            background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
-            position: relative;
+            padding: 40px 20px;
+            background: linear-gradient(to bottom, rgba(30,0,60,0.7), rgba(80,0,120,0.4));
         }
 
         .profile-pic {
-            width: 150px;
-            height: 150px;
+            width: 140px;
+            height: 140px;
             border-radius: 50%;
-            border: 5px solid #ff00ff;
-            animation: glow 2s infinite alternate, rotate 10s infinite linear;
-            margin-bottom: 20px;
+            border: 4px solid #ff00cc;
+            box-shadow: 0 0 25px #ff00cc80;
+            animation: pulse 3s infinite alternate;
         }
 
-        @keyframes glow {
-            from { box-shadow: 0 0 10px #ff00ff; }
-            to { box-shadow: 0 0 30px #ff00ff; }
+        @keyframes pulse {
+            from { transform: scale(1); box-shadow: 0 0 15px #ff00cc60; }
+            to   { transform: scale(1.08); box-shadow: 0 0 40px #ff00cc; }
         }
 
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
+        h1 { color: #ff4de6; text-shadow: 0 0 15px #ff4de6; margin: 10px 0; }
+        p.tagline { font-style: italic; color: #a78bfa; }
 
-        h1 {
-            font-size: 2.5em;
-            color: #ff69b4;
-            text-shadow: 2px 2px 4px #000;
-            animation: textGlow 1.5s infinite alternate;
-        }
+        main { max-width: 900px; margin: 0 auto; padding: 20px; }
 
-        @keyframes textGlow {
-            from { text-shadow: 2px 2px 4px #000; }
-            to { text-shadow: 2px 2px 10px #ff69b4; }
-        }
-
-        /* Main content */
-        main {
-            max-width: 800px;
-            margin: 0 auto;
+        .chat-section {
+            background: rgba(20, 10, 50, 0.75);
+            border: 2px solid #00e6e6;
+            border-radius: 16px;
             padding: 20px;
+            backdrop-filter: blur(6px);
+            box-shadow: 0 8px 32px rgba(0,230,230,0.2);
         }
 
-        section {
-            margin-bottom: 40px;
+        #chatBox {
+            height: 380px;
+            overflow-y: auto;
+            padding: 15px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 12px;
+            margin-bottom: 15px;
         }
 
-        h2 {
-            color: #00ffff;
-            text-shadow: 1px 1px 2px #000;
+        .message {
+            margin: 12px 0;
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+            animation: fadeInMsg 0.4s ease-out;
         }
 
-        /* Chat box */
-        .chat-box {
-            background-color: #2a2a4e;
-            border: 2px solid #00ffff;
-            border-radius: 10px;
-            padding: 20px;
-            height: 300px;
-            overflow-y: scroll;
-            margin-bottom: 20px;
-            animation: slideIn 1s ease-out;
+        .sent {
+            background: linear-gradient(135deg, #ff4de6, #c94dff);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
         }
 
-        @keyframes slideIn {
-            from { transform: translateX(-100%); }
-            to { transform: translateX(0); }
+        .received {
+            background: linear-gradient(135deg, #00e6e6, #00b3b3);
+            color: #000;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
         }
 
-        .chat-message {
-            background-color: #3a3a5e;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
+        @keyframes fadeInMsg {
+            from { opacity: 0; transform: translateY(15px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         .chat-input {
             display: flex;
+            gap: 10px;
         }
 
-        input[type="text"] {
+        #username {
+            width: 160px;
+            padding: 14px;
+            border: 2px solid #ff00cc;
+            border-radius: 30px;
+            background: rgba(255,255,255,0.08);
+            color: white;
+        }
+
+        #chatInput {
             flex: 1;
-            padding: 10px;
-            border: 1px solid #00ffff;
-            border-radius: 5px 0 0 5px;
-            background-color: #1a1a2e;
-            color: #e0e0e0;
+            padding: 14px;
+            border: 2px solid #00e6e6;
+            border-radius: 30px;
+            background: rgba(255,255,255,0.08);
+            color: white;
+            font-size: 1.05rem;
         }
 
-        button {
-            padding: 10px 20px;
-            background-color: #ff69b4;
+        #sendBtn {
+            padding: 0 28px;
+            background: #ff4de6;
             border: none;
-            border-radius: 0 5px 5px 0;
-            color: #fff;
+            border-radius: 30px;
+            color: white;
+            font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s;
         }
 
-        button:hover {
-            background-color: #ff1493;
-        }
+        #sendBtn:hover { background: #ff1ac7; transform: scale(1.05); }
 
-        /* Music player */
         .music-player {
-            background-color: #2a2a4e;
-            border: 2px solid #ff00ff;
-            border-radius: 10px;
+            margin-top: 40px;
+            background: rgba(20,10,50,0.75);
+            border: 2px solid #ff00cc;
+            border-radius: 16px;
             padding: 20px;
             text-align: center;
-            animation: slideInRight 1s ease-out;
         }
 
-        @keyframes slideInRight {
-            from { transform: translateX(100%); }
-            to { transform: translateX(0); }
-        }
+        audio { width: 100%; margin-top: 12px; filter: hue-rotate(200deg); }
 
-        audio {
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        /* Footer */
-        footer {
-            text-align: center;
-            padding: 20px;
-            background-color: #0f0c29;
-            color: #888;
-        }
+        .info { color: #ffcc00; font-size: 0.9rem; margin: 10px 0; }
     </style>
 </head>
 <body>
+
     <header>
-        <img src="https://via.placeholder.com/150?text=Anime+Avatar" alt="Anime Profile Pic" class="profile-pic">
-        <h1>Welcome to My Anime Profile</h1>
-        <p>Explore my animated world inspired by anime!</p>
+        <img src="https://via.placeholder.com/140/FF00CC/000?text=Anixer" alt="Anime Avatar" class="profile-pic">
+        <h1>Anixer’s Anime Realm</h1>
+        <p class="tagline">✨ True Realtime Weeb Chat – Powered by Supabase ✨</p>
     </header>
 
     <main>
-        <section id="about">
-            <h2>About Me</h2>
-            <p>I'm an anime enthusiast who loves creating digital art, chatting with fans, and listening to epic soundtracks. This profile is animated with CSS magic to bring that anime vibe alive!</p>
-        </section>
+        <section class="chat-section">
+            <h2 style="color:#00e6e6; text-shadow:0 0 10px #00e6e6;">Live Anime Chat</h2>
+            <div class="info">Enter a username (persists in this tab) and start chatting — messages appear instantly for everyone!</div>
 
-        <section id="chat">
-            <h2>Chat Box</h2>
-            <div class="chat-box" id="chatBox">
-                <!-- Chat messages will appear here -->
+            <div class="chat-input" style="margin-bottom:12px;">
+                <input type="text" id="username" placeholder="Your username..." value="KawaiiSenpai">
             </div>
+
+            <div id="chatBox"></div>
+
             <div class="chat-input">
-                <input type="text" id="chatInput" placeholder="Type your message...">
-                <button onclick="sendMessage()">Send</button>
+                <input type="text" id="chatInput" placeholder="Type your message... (Enter to send)">
+                <button id="sendBtn">Send</button>
             </div>
         </section>
 
-        <section id="music">
-            <h2>Music Player</h2>
-            <div class="music-player">
-                <p>Play some anime OST!</p>
-                <audio controls>
-                    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
-                    Your browser does not support the audio element.
-                </audio>
-            </div>
+        <section class="music-player">
+            <p>Now Playing: Epic Anime OST</p>
+            <audio controls loop>
+                <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+                Your browser does not support audio.
+            </audio>
         </section>
     </main>
 
-    <footer>
-        <p>&copy; 2026 Anime Profile. All rights reserved.</p>
-    </footer>
-
     <script>
-        function sendMessage() {
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
-            if (message) {
-                const chatBox = document.getElementById('chatBox');
-                const msgDiv = document.createElement('div');
-                msgDiv.classList.add('chat-message');
-                msgDiv.textContent = message;
-                chatBox.appendChild(msgDiv);
-                chatBox.scrollTop = chatBox.scrollHeight;
-                input.value = '';
-            }
+        // === Replace these with your Supabase values ===
+        const SUPABASE_URL = 'https://your-project-id.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...your-anon-key-here';
+
+        const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const chatBox = document.getElementById('chatBox');
+        const chatInput = document.getElementById('chatInput');
+        const usernameInput = document.getElementById('username');
+        const sendBtn = document.getElementById('sendBtn');
+
+        let currentUser = usernameInput.value.trim() || 'AnonymousWeeb';
+
+        // Update username when changed
+        usernameInput.addEventListener('change', () => {
+            currentUser = usernameInput.value.trim() || 'AnonymousWeeb';
+        });
+
+        function addMessage(username, content, isSent = false) {
+            const msg = document.createElement('div');
+            msg.classList.add('message', isSent ? 'sent' : 'received');
+            msg.innerHTML = `<strong>${username}:</strong> ${content}`;
+            chatBox.appendChild(msg);
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
+
+        async function sendMessage() {
+            const content = chatInput.value.trim();
+            if (!content) return;
+
+            const { error } = await supabase
+                .from('messages')
+                .insert({ username: currentUser, content });
+
+            if (error) {
+                console.error('Error sending message:', error);
+                alert('Failed to send — check console & Supabase setup');
+                return;
+            }
+
+            // Optimistic UI: add immediately (will also come back via realtime)
+            addMessage(currentUser, content, true);
+            chatInput.value = '';
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // === Realtime subscription ===
+        supabase
+            .channel('public:messages')
+            .on('postgres_changes', 
+                { event: 'INSERT', schema: 'public', table: 'messages' },
+                (payload) => {
+                    const { username, content } = payload.new;
+                    const isSent = username === currentUser;
+                    addMessage(username, content, isSent);
+                }
+            )
+            .subscribe((status) => {
+                console.log('Realtime subscription status:', status);
+                if (status === 'SUBSCRIBED') {
+                    addMessage('System', 'Connected to realtime chat! Start talking\~', false);
+                }
+            });
+
+        // Optional: Load recent messages on join (last 20)
+        async function loadRecentMessages() {
+            const { data, error } = await supabase
+                .from('messages')
+                .select('username, content, created_at')
+                .order('created_at', { ascending: false })
+                .limit(20);
+
+            if (error) {
+                console.error('Error loading history:', error);
+                return;
+            }
+
+            // Show oldest first
+            data.reverse().forEach(msg => {
+                const isSent = msg.username === currentUser;
+                addMessage(msg.username, msg.content, isSent);
+            });
+        }
+
+        loadRecentMessages();
     </script>
+
 </body>
 </html>
